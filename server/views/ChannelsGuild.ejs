@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord 2</title>
+
+    <link rel="stylesheet" href="/style.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+        integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog=="
+        crossorigin="anonymous" />
+    <link rel="stylesheet" href="/style.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"
+        integrity="sha512-hUhvpC5f8cgc04OZb55j0KNGh4eh7dLxd/dPSJ5VyzqDWxsayYbojWyl5Tkcgrmb/RVKCRJI1jNlRbVP4WWC4w=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+
+    <script>
+        const selectedChannelIds = localStorage.setItem('selectedChannelIds');
+        const guild_id = <%= guild.id %>;
+
+        // selectedChannelIds den guild_id si guild id olan en son seçilen kanala yönlendiriyoruz yoksa boş bir sayfa geliyor 
+        if (selectedChannelIds && selectedChannelIds[guild_id] && <% selectedByUser %> === false) {
+            window.location.href = `/channels/${guild_id}/${selectedChannelIds[guild_id]}`;
+        } else {
+            window.location.href = `/channels/${guild_id}/<%= channels[0].id %>`;
+        }
+    </script>
+
+    <main>
+        <div class="left-menu">
+
+            <a class="dm borderdf" href="/channels">
+                <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="none"
+                    viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                        d="M19.73 4.87a18.2 18.2 0 0 0-4.6-1.44c-.21.4-.4.8-.58 1.21-1.69-.25-3.4-.25-5.1 0-.18-.41-.37-.82-.59-1.2-1.6.27-3.14.75-4.6 1.43A19.04 19.04 0 0 0 .96 17.7a18.43 18.43 0 0 0 5.63 2.87c.46-.62.86-1.28 1.2-1.98-.65-.25-1.29-.55-1.9-.92.17-.12.32-.24.47-.37 3.58 1.7 7.7 1.7 11.28 0l.46.37c-.6.36-1.25.67-1.9.92.35.7.75 1.35 1.2 1.98 2.03-.63 3.94-1.6 5.64-2.87.47-4.87-.78-9.09-3.3-12.83ZM8.3 15.12c-1.1 0-2-1.02-2-2.27 0-1.24.88-2.26 2-2.26s2.02 1.02 2 2.26c0 1.25-.89 2.27-2 2.27Zm7.4 0c-1.1 0-2-1.02-2-2.27 0-1.24.88-2.26 2-2.26s2.02 1.02 2 2.26c0 1.25-.88 2.27-2 2.27Z"
+                        class=""></path>
+                </svg>
+            </a>
+
+            <div class="servers-list ">
+                <% if(guilds) { %>
+                    <% for (let i=0; i < guilds.length; i++) { %>
+                        <a href="/channels/<%= guilds[i].guild_id %>" class="server-block">
+                            <%= guilds[i].name %>
+                        </a>
+                        <% } %>
+                            <% } %>
+            </div>
+
+        </div>
+
+        <div class="right-menu">
+
+            <div class="right-menu1">
+
+                <div class="server-name">
+                    Hello World
+                </div>
+
+
+                <div class="categories-channels">
+                    <div class="category">
+                        <div class="category-name">CHAT</div>
+                        <div class="category-channels">
+                            <% for (let i=0; i < channels.length; i++) { %>
+                                <a href="/channels/<%= guild.id %>/<%= channels[i].id %>" class="channel">
+                                    <span class="channel-name">#<%= channels[i].name %></span></a>
+                                <% } %>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="user">
+                    <div class="pp">
+                        <img src="data:image/png;base64,<%= user.avatar %>" alt="" class="pp-img" />
+                        <div class="mid">
+                            <span class="">
+                                <%= user.username %>
+                            </span>
+                        </div>
+                    </div>
+
+
+                    <div class="right">
+                        <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                            fill="none" viewBox="0 0 24 24">
+                            <path fill="var(--interactive-normal)" fill-rule="evenodd"
+                                d="M10.56 1.1c-.46.05-.7.53-.64.98.18 1.16-.19 2.2-.98 2.53-.8.33-1.79-.15-2.49-1.1-.27-.36-.78-.52-1.14-.24-.77.59-1.45 1.27-2.04 2.04-.28.36-.12.87.24 1.14.96.7 1.43 1.7 1.1 2.49-.33.8-1.37 1.16-2.53.98-.45-.07-.93.18-.99.64a11.1 11.1 0 0 0 0 2.88c.06.46.54.7.99.64 1.16-.18 2.2.19 2.53.98.33.8-.14 1.79-1.1 2.49-.36.27-.52.78-.24 1.14.59.77 1.27 1.45 2.04 2.04.36.28.87.12 1.14-.24.7-.95 1.7-1.43 2.49-1.1.8.33 1.16 1.37.98 2.53-.07.45.18.93.64.99a11.1 11.1 0 0 0 2.88 0c.46-.06.7-.54.64-.99-.18-1.16.19-2.2.98-2.53.8-.33 1.79.14 2.49 1.1.27.36.78.52 1.14.24.77-.59 1.45-1.27 2.04-2.04.28-.36.12-.87-.24-1.14-.96-.7-1.43-1.7-1.1-2.49.33-.8 1.37-1.16 2.53-.98.45.07.93-.18.99-.64a11.1 11.1 0 0 0 0-2.88c-.06-.46-.54-.7-.99-.64-1.16.18-2.2-.19-2.53-.98-.33-.8.14-1.79 1.1-2.49.36-.27.52-.78.24-1.14a11.07 11.07 0 0 0-2.04-2.04c-.36-.28-.87-.12-1.14.24-.7.96-1.7 1.43-2.49 1.1-.8-.33-1.16-1.37-.98-2.53.07-.45-.18-.93-.64-.99a11.1 11.1 0 0 0-2.88 0ZM16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
+                                clip-rule="evenodd" class=""></path>
+                        </svg>
+                    </div>
+
+                </div>
+
+
+
+            </div>
+
+            <div class="right-menu2">
+
+
+                <div class="top">
+                    <div class="chat-channel-name">
+                        #<%= channels[0].name %>
+                    </div>
+                </div>
+
+                <div class="chat">
+
+                    <div class="message-container">
+                
+                        <!-- Display Messages -->
+                        <% if (messages && messages.length > 0) { %>
+                            <% for (let i = 0; i < messages.length; i++) { %>
+                                <div class="message-box">
+                                    <div class="author-pp">
+                                        <img src="data:image/png;base64,<%= messages[i].avatar %>" alt="" class="pp-img" />
+                                    </div>
+                                    <div class="message-content">
+                                        <div class="message-author">
+                                            <script>
+                                            
+                                            </script>
+                                            <%= messages[i].username %> - <span class="message-date"><%= messages[i].timestamp %></span>
+                                        </div>
+                                        <div class="message-text">
+                                            <%= messages[i].message %>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+                        <% } else { %>
+                            <div class="alert">
+                                <div class="alert-title">
+                                    No messages. Send the first message!
+                                </div>
+                            </div>
+                        <% } %>
+                
+                    </div>
+                
+                    <!-- Message Input Form -->
+                    <form action="" class="sending-message" id="message-form">
+                        <input type="text" placeholder="Message #general" name="message" class="message-input">
+                        <input type="hidden" name="channel_id" value="<%= channels[0].id %>">
+                        <input type="hidden" name="guild_id" value="<%= guild.id %>">
+                        <input type="hidden" name="user_id" value="<%= user.id %>">
+                        <button class="send-message-btn" type="submit" style="display: none;"></button>
+                    </form>
+                
+                </div>
+
+            </div>
+
+            <div class="right-menu3">
+
+                <div class="online-players">
+                    <div class="online-players-title">
+                        Members - <%= members.length %>
+                    </div>
+                    <div class="online-players-list">
+                        <% for (let i=0; i < members.length; i++) { %>
+                            <div class="online-player">
+                                <div class="online-player-pp">
+                                    <img src="data:image/png;base64,<%= members[i].avatar %>" alt="" class="pp-img" />
+                                </div>
+                                <div class="online-player-name">
+                                    <%= members[i].username %>
+                                </div>
+                            </div>
+                            <% } %>
+                    </div>
+                </div>
+
+
+            </div>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"
+        integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4"
+        crossorigin="anonymous"></script>
+
+        <script>
+            const socket = io();
+            const messageContainer = document.querySelector('.message-container');
+            const messageForm = document.getElementById('message-form');
+            const messageInput = document.querySelector('.message-input');
+        
+            messageForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                sendMessage();
+            });
+        
+            socket.on('guild-message', (data) => {
+                // Handle new group messages received from the server
+                addMessageToUI(data);
+            });
+        
+            function sendMessage() {
+                const message = messageInput.value;
+                if (message.trim() === '') return;
+        
+                const data = {
+                    user_id: <%= user.id %>,
+                    guild_id: <%= guild.id %>,
+                    channel_id: <%= channels[0].id %>,
+                    message: message,
+                };
+        
+                socket.emit('guild-message', data);
+                addMessageToUI(data);
+        
+                // Clear the message input field after sending the message
+                messageInput.value = '';
+            }
+        
+            function addMessageToUI(data) {
+                // Add the new message to the UI
+                const messageBox = document.createElement('div');
+                messageBox.classList.add('message-box');
+                messageBox.innerHTML = `
+                    <div class="author-pp">
+                        <img src="data:image/png;base64,${data.avatar}" alt="" class="pp-img" />
+                    </div>
+                    <div class="message-content">
+                        <div class="message-author">
+                            ${data.username} - <span class="message-date">${data.timestamp}</span>
+                        </div>
+                        <div class="message-text">
+                            ${data.message}
+                        </div>
+                    </div>
+                `;
+        
+                messageContainer.appendChild(messageBox);
+        
+                // Optionally, you may want to scroll to the bottom to show the latest message
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            }
+        </script>
+        
+</body>
+
+</html>

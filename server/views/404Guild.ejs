@@ -1,0 +1,10 @@
+404 guild not found
+
+<% if(guilds) { %>
+    <% for (let i=0; i < guilds.length; i++) { %>
+        <a href="/channels/<%= guilds[i].guild_id %>" class="server-block">
+            <%= guilds[i].name %>
+        </a>
+        <% } %>
+            <% } %>
+            

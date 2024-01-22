@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord 2</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css"
+        integrity="sha512-1PKOgIY59xJ8Co8+NE6FZ+LOAZKjy+KY8iq0G4B3CyeY6wYHN3yt9PW0XpSriVlkMXe40PTKnXrLnZ9+fkDaog=="
+        crossorigin="anonymous" />
+    <link rel="stylesheet" href="/style.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/moment.min.js"
+        integrity="sha512-hUhvpC5f8cgc04OZb55j0KNGh4eh7dLxd/dPSJ5VyzqDWxsayYbojWyl5Tkcgrmb/RVKCRJI1jNlRbVP4WWC4w=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<style>
+    .server-name {
+        flex-direction: column;
+        height: 200px;
+        overflow-x: scroll;
+        overflow-y: hidden;
+    }
+</style>
+
+<body>
+
+    <main>
+        <div class="left-menu">
+
+            <a class="dm borderdf" href="/channels">
+                <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="none"
+                    viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                        d="M19.73 4.87a18.2 18.2 0 0 0-4.6-1.44c-.21.4-.4.8-.58 1.21-1.69-.25-3.4-.25-5.1 0-.18-.41-.37-.82-.59-1.2-1.6.27-3.14.75-4.6 1.43A19.04 19.04 0 0 0 .96 17.7a18.43 18.43 0 0 0 5.63 2.87c.46-.62.86-1.28 1.2-1.98-.65-.25-1.29-.55-1.9-.92.17-.12.32-.24.47-.37 3.58 1.7 7.7 1.7 11.28 0l.46.37c-.6.36-1.25.67-1.9.92.35.7.75 1.35 1.2 1.98 2.03-.63 3.94-1.6 5.64-2.87.47-4.87-.78-9.09-3.3-12.83ZM8.3 15.12c-1.1 0-2-1.02-2-2.27 0-1.24.88-2.26 2-2.26s2.02 1.02 2 2.26c0 1.25-.89 2.27-2 2.27Zm7.4 0c-1.1 0-2-1.02-2-2.27 0-1.24.88-2.26 2-2.26s2.02 1.02 2 2.26c0 1.25-.88 2.27-2 2.27Z"
+                        class=""></path>
+                </svg>
+            </a>
+
+            <div class="servers-list ">
+                <% if(guilds) { %>
+                    <% for (let i=0; i < guilds.length; i++) { %>
+                        <a href="/channels/<%= guilds[i].guild_id %>" class="server-block">
+                            <%= guilds[i].name %>
+                        </a>
+                        <% } %>
+                            <% } %>
+            </div>
+
+            <div class="create-server" onclick="createServerForm()">
+                +
+            </div>
+
+            <div class="create-server-form" style="display: none;">
+                <form action="/create-server" method="POST" style="display: flex; flex-direction: column;">
+                    <h1>Create a server</h1> <br>
+                    <input type="text" name="guild_name" id="serverName" placeholder="Server Name" /> <br>
+                    <button type="submit">Create</button>
+                </form>
+
+                <style>
+                    .create-server {
+                        padding: 15px;
+                        border-radius: 360px;
+                        color: white;
+                        font-weight: bold;
+                        background-color: rgb(31, 31, 31);
+                    }
+
+                    .create-server-form {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100vw;
+                        height: 100vh;
+                        background-color: rgba(0, 0, 0, 0.5);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 999;
+                    }
+                </style>
+            </div>
+
+            <script>
+                function createServerForm() {
+                    const createServerForm = document.querySelector('.create-server-form');
+                    createServerForm.style.display = 'flex';
+                }
+            </script>
+
+
+        </div>
+
+        <div class="right-menu">
+
+
+            <div class="right-menu1">
+
+                <div class="server-name">
+                    Friends
+
+                    <form id="searchForm" action="/search-user" method="GET">
+                        <input type="text" name="username" id="username" placeholder="Search for a user"
+                            class="search-user" />
+                    </form>
+
+                    <div id="searchResults" class="results"></div>
+                </div>
+
+                <script>
+                    const searchForm = document.getElementById('searchForm');
+                    const searchResultsContainer = document.getElementById('searchResults');
+                    let searchTimeout;
+
+                    document.getElementById('username').addEventListener('input', function () {
+                        clearTimeout(searchTimeout);
+
+                        const username = this.value.trim();
+
+                        if (username !== '') {
+                            searchTimeout = setTimeout(() => {
+                                searchUsers(username);
+                            }, 500); // 1 saniye sonra arama yap
+                        } else {
+                            searchResultsContainer.innerHTML = ''; // Eğer boş ise sonuçları temizle
+                        }
+                    });
+
+                    async function searchUsers(username) {
+                        try {
+                            const response = await fetch(`/search-user?username=${username}`);
+                            const results = await response.json();
+
+                            displaySearchResults(results);
+                        } catch (error) {
+                            console.error('Error during user search:', error);
+                        }
+                    }
+
+                    function displaySearchResults(results) {
+                        searchResultsContainer.innerHTML = '';
+
+                        if (results.length > 0) {
+                            results.forEach((result) => {
+                                const userLink = document.createElement('a');
+                                userLink.href = `/channels/@me/${result.id}`;
+
+                                userLink.onclick = () => {
+                                    // id varsa ekle silip en başa ekle yoksa yoksa en başa ekle
+                                    let channelHistory = JSON.parse(localStorage.getItem('channelHistory')) || [];
+
+                                    if (channelHistory.includes(result.id)) {
+                                        channelHistory.splice(channelHistory.indexOf(result.id), 1);
+                                        channelHistory.unshift(result.id);
+                                    } else {
+                                        channelHistory.unshift(result.id);
+                                    }
+
+                                    // Update localStorage with the modified channelHistory
+                                    localStorage.setItem('channelHistory', JSON.stringify(channelHistory));
+                                };
+
+                                userLink.classList.add('result');
+
+                                const resultName = document.createElement('div');
+                                resultName.classList.add('result-name');
+                                resultName.textContent = result.username;
+
+                                userLink.appendChild(resultName);
+                                searchResultsContainer.appendChild(userLink);
+                            });
+                        } else {
+                            searchResultsContainer.innerHTML = 'No results found.';
+                        }
+                    }
+                </script>
+
+                <div class="friends">
+                    <script>
+                        const friendList = document.querySelector('.friends');
+                        let channelHistory = JSON.parse(localStorage.getItem('channelHistory')) || [];
+
+                        // Check if channelHistory is defined before using it
+                        if (channelHistory) {
+                            for (let i = 0; i < channelHistory.length; i++) {
+                                friendList.innerHTML += `<a href="/channels/@me/${channelHistory[i]}" class="friend" onclick="updateChannelHistory(${channelHistory[i]})">${channelHistory[i]}</a>`;
+                            }
+                        }
+
+                        // function updateChannelHistory(c_id) {
+                        //     const index = channelHistory.indexOf(c_id);
+
+                        //     if (index !== -1) {
+                        //         // If c_id exists in channelHistory, remove it
+                        //         channelHistory.splice(index, 1);
+                        //     }
+
+                        //     // Add c_id to the beginning of channelHistory
+                        //     channelHistory.unshift(c_id);
+
+                        //     // Update localStorage with the modified channelHistory
+                        //     localStorage.setItem('channelHistory', JSON.stringify(channelHistory));
+
+                        //     // Add your additional logic if needed
+                        // }
+                    </script>
+                </div>
+
+
+
+                <div class="user">
+                    <div class="pp">
+                        <img src="data:image/png;base64,<%= user.avatar %>" alt="" class="pp-img" />
+                        <div class="mid">
+                            <span class="">
+                                <%= user.username %>
+                            </span>
+                        </div>
+                    </div>
+
+
+                    <div class="right">
+                        <svg aria-hidden="true" role="img" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                            fill="none" viewBox="0 0 24 24">
+                            <path fill="var(--interactive-normal)" fill-rule="evenodd"
+                                d="M10.56 1.1c-.46.05-.7.53-.64.98.18 1.16-.19 2.2-.98 2.53-.8.33-1.79-.15-2.49-1.1-.27-.36-.78-.52-1.14-.24-.77.59-1.45 1.27-2.04 2.04-.28.36-.12.87.24 1.14.96.7 1.43 1.7 1.1 2.49-.33.8-1.37 1.16-2.53.98-.45-.07-.93.18-.99.64a11.1 11.1 0 0 0 0 2.88c.06.46.54.7.99.64 1.16-.18 2.2.19 2.53.98.33.8-.14 1.79-1.1 2.49-.36.27-.52.78-.24 1.14.59.77 1.27 1.45 2.04 2.04.36.28.87.12 1.14-.24.7-.95 1.7-1.43 2.49-1.1.8.33 1.16 1.37.98 2.53-.07.45.18.93.64.99a11.1 11.1 0 0 0 2.88 0c.46-.06.7-.54.64-.99-.18-1.16.19-2.2.98-2.53.8-.33 1.79.14 2.49 1.1.27.36.78.52 1.14.24.77-.59 1.45-1.27 2.04-2.04.28-.36.12-.87-.24-1.14-.96-.7-1.43-1.7-1.1-2.49.33-.8 1.37-1.16 2.53-.98.45.07.93-.18.99-.64a11.1 11.1 0 0 0 0-2.88c-.06-.46-.54-.7-.99-.64-1.16.18-2.2-.19-2.53-.98-.33-.8.14-1.79 1.1-2.49.36-.27.52-.78.24-1.14a11.07 11.07 0 0 0-2.04-2.04c-.36-.28-.87-.12-1.14.24-.7.96-1.7 1.43-2.49 1.1-.8-.33-1.16-1.37-.98-2.53.07-.45-.18-.93-.64-.99a11.1 11.1 0 0 0-2.88 0ZM16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"
+                                clip-rule="evenodd" class=""></path>
+                        </svg>
+                    </div>
+
+                </div>
+
+
+
+            </div>
+
+
+            <div class="right-menu2">
+
+
+                <div class="top">
+                    <div class="chat-channel-name">
+                        <% if (!messages) { %>
+
+                            <div>Sohbete başlayailibrsin</div>
+
+                            <% } else { %>
+
+                                <div id="name-input">
+                                    <% if (receiver) { %>
+                                        <%= receiver.username %>
+                                            <% } else { %>
+                                                <span>Bu kullanıcı bulunmadı</span>
+                                                <% } %>
+                                </div>
+
+                                <% } %>
+
+                    </div>
+                </div>
+
+
+                <div class="chat message-container">
+
+
+                    <% if (messages) { %>
+                        <ul class="message-container" id="message-container">
+                            <% for (const message of messages) { %>
+                                <li>
+                                    <div class="message-crc ">
+
+
+                                        <div class="author-pp">
+                                            <img src="data:image/png;base64,<%= message.sender_id === user.id ? user.avatar : (receiver ? receiver.avatar : "Undefined ser") %>" alt="" class="pp-img" />             
+                                        </div>
+
+
+                                        <div class="author-info">
+                                            <div class="author-name">
+                                                <span class="author-name">
+                                                    <%= message.sender_id === user.id ? user.username : (receiver ? receiver.username : "Undefined ser") %>
+
+                                                </span>
+                                                <span class="author-date">● Today at 12:00</span>
+                                            </div>
+                                            <div class="message-content">
+                                                <%= message.message %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                                <% } %>
+                        </ul>
+
+                        <form class="message-form sending-message" id="message-form">
+                            <input type="text" name="message" id="message-input" class="message-input" placeholder="Mesaj"/>
+                            <input type="hidden" name="receiverId" value="2">
+                            <input type="hidden" name="senderId" value="<%= user.id %>">
+                            <div class="v-divider"></div>
+                            <button type="submit" class="send-button" style="display: none;">
+                                gönder <span><i class="fas fa-paper-plane"></i></span>
+                            </button>
+                        </form>
+                        <% } %>
+
+                </div>
+
+
+            </div>
+
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"
+        integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4"
+        crossorigin="anonymous"></script>
+
+</body>
+
+</html>
+
+<script>
+    const socket = io();
+    const clientsTotal = document.getElementById('client-total');
+    const messageContainer = document.getElementById('message-container');
+    const nameInput = document.getElementById('name-input');
+    const messageForm = document.getElementById('message-form');
+    const messageInput = document.getElementById('message-input');
+    const messageTone = new Audio('/message-tone.mp3');
+
+    messageForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        sendMessage();
+    });
+
+    socket.on('clients-total', (data) => {
+        clientsTotal.innerText = `Total Clients: ${data}`;
+    });
+
+    function sendMessage() {
+        if (messageInput.value === '') return;
+
+        const data = {
+            name: nameInput.value,
+            senderId: <%= user.id %>,
+            receiverId: 2,
+            message: messageInput.value,
+        };
+
+        socket.emit('private-message', data);
+        addMessageToUI(true, data);
+        messageInput.value = '';
+    }
+
+    socket.on('private-message', (data) => {
+        messageTone.play();
+        addMessageToUI(false, data);
+    });
+
+
+    function addMessageToUI(isOwnMessage, data) {
+        clearFeedback();
+
+        const element = `
+        <li class="${isOwnMessage ? 'message-right' : 'message-left'}">
+            <p class="message">
+   
+            <div class="message-crc">
+<div class="author-pp">
+</div>
+
+<div class="author-info">
+    <div class="author-name">
+        <span class="author-name">
+            <%= user.username %>
+        </span>
+        <span class="author-date">● Today at 12:00</span>
+    </div>
+    <div class="message-content">
+        ${data.message}
+    </div>
+</div>
+</div>
+            </p>
+        </li>`;
+
+        messageContainer.innerHTML += element;
+        scrollToBottom();
+    }
+
+    function scrollToBottom() {
+        messageContainer.scrollTo(0, messageContainer.scrollHeight);
+    }
+
+    messageInput.addEventListener('focus', () => {
+        socket.emit('feedback', {
+            feedback: `✍️ ${nameInput.value} is typing a message`,
+        });
+    });
+
+    messageInput.addEventListener('keypress', () => {
+        socket.emit('feedback', {
+            feedback: `✍️ ${nameInput.value} is typing a message`,
+        });
+    });
+
+    messageInput.addEventListener('blur', () => {
+        socket.emit('feedback', {
+            feedback: '',
+        });
+    });
+
+    socket.on('feedback', (data) => {
+        clearFeedback();
+        const element = `
+<li class="message-feedback">
+<p class="feedback" id="feedback">${data.feedback}</p>
+</li>
+`;
+
+        messageContainer.innerHTML += element;
+    });
+
+    function clearFeedback() {
+        document.querySelectorAll('li.message-feedback').forEach((element) => {
+            element.parentNode.removeChild(element);
+        });
+    }
+
+
+</script>
